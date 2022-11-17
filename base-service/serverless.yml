@@ -1,0 +1,48 @@
+service: base-service
+
+plugins:
+  - serverless-bundle
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  region: ap-southeast-1
+  environment:
+    SURVEYS_TABLE_NAME: ${self:custom.SurveysTable.name}
+  iamRoleStatements:
+    - ${file(iam/SurveysTableIAM.yml):SurveysTableIAM}
+
+resources:
+  Resources:
+    SurveysTable: ${file(resources/SurveysTable.yml):SurveysTable}
+
+functions:
+  createSurvey:
+    handler: src/handlers/createSurvey.handler
+    events:
+      - http:
+          method: POST
+          path: /survey
+
+  getSurveys:
+    handler: src/handlers/getSurveys.handler
+    events:
+      - http:
+          method: GET
+          path: /surveys
+
+  getSurvey:
+    handler: src/handlers/getSurvey.handler
+    events:
+      - http:
+          method: GET
+          path: /survey/{id}
+
+
+custom:
+  SurveysTable:
+    name: !Ref SurveysTable
+    arn: !GetAtt SurveysTable.Arn

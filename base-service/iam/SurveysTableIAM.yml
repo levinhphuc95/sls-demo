@@ -1,0 +1,6 @@
+SurveysTableIAM:
+  Effect: Allow
+  Action:
+    - dynamodb:*
+  Resource:
+    - ${self:custom.SurveysTable.arn}
